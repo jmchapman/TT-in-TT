@@ -3,12 +3,10 @@ module Syntax where
 data Con : Set
 data Ty : Con → Set
 data Tm : (Γ : Con) → Ty Γ → Set
-data Tms : Con → Con → Set
+data Sub : Con → Con → Set
 
---data _≡Con_ : Con → Con → Set
---data _≡Ty_  : ∀{Γ} → Ty Γ → Ty Γ → Set
 data _≡Tm_ : ∀{Γ A} → Tm Γ A → Tm Γ A → Set
-data _≡Tms_ : ∀{Γ Δ} → Tms Γ Δ → Tms Γ Δ → Set
+data _≡Sub_ : ∀{Γ Δ} → Sub Γ Δ → Sub Γ Δ → Set
 
 infix 4 _·_
 
@@ -19,61 +17,42 @@ data Con where
 data Ty where
   U    : ∀{Γ} → Ty Γ
   El   : ∀{Γ} → Tm Γ U → Ty Γ
-  Π    : ∀{Γ}(A : Ty Γ)(B : Ty (Γ · A)) → Ty Γ
-  _[_] : ∀{Γ Δ} → Ty Γ → Tms Δ Γ → Ty Δ
---  _<_> : ∀{Γ Δ} → Ty Γ → Δ ≡Con Γ → Ty Δ
+  Π    : ∀{Γ}(σ : Ty Γ)(τ : Ty (Γ · σ)) → Ty Γ
+  _[_] : ∀{Γ Δ} → Ty Δ → Sub Γ Δ → Ty Γ
 
-data Tms where
-  ↑ : ∀{Γ} A → Tms (Γ · A) Γ
-  id : ∀{Γ} → Tms Γ Γ
-  _•_ : ∀{Θ Γ Δ} → Tms Γ Δ → Tms Θ Γ → Tms Θ Δ
-  ε : ∀{Γ} → Tms Γ ε
-  _·_ : ∀{Γ Δ A} → (γ : Tms Γ Δ) → Tm Γ (A [ γ ]) → Tms Γ (Δ · A)
+data Sub where
+  ↑ : ∀{Γ} σ → Sub (Γ · σ) Γ
+  id : ∀{Γ} → Sub Γ Γ
+  _•_ : ∀{Θ Γ Δ} → Sub Γ Δ → Sub Θ Γ → Sub Θ Δ
+  ε : ∀{Γ} → Sub Γ ε
+  _·_ : ∀{Γ Δ σ} → (γ : Sub Γ Δ) → Tm Γ (σ [ γ ]) → Sub Γ (Δ · σ)
 
 data Tm where
-  vz   : ∀{Γ A} → Tm (Γ · A) (A [ ↑ A ])
-  _[_] : ∀{Γ Δ A} → Tm Γ A → (γ : Tms Δ Γ) → Tm Δ (A [ γ ])
-  lam  : ∀{Γ A B} → Tm (Γ · A) B → Tm Γ (Π A B)
-  app  : ∀{Γ A B} → Tm Γ (Π A B) → Tm (Γ · A) B
-  _<_> : ∀{Γ Δ A}{γ γ' : Tms Δ Γ} → γ ≡Tms γ' → Tm Δ (A [ γ ]) → Tm Δ (A [ γ' ]) -- map
+  vz   : ∀{Γ σ} → Tm (Γ · σ) (σ [ ↑ σ ])
+  _[_] : ∀{Γ Δ σ} → Tm Δ σ → (γ : Sub Γ Δ) → Tm Γ (σ [ γ ])
+  lam  : ∀{Γ σ τ} → Tm (Γ · σ) τ → Tm Γ (Π σ τ)
+  app  : ∀{Γ σ τ} → Tm Γ (Π σ τ) → Tm (Γ · σ) τ
+  _<_> : ∀{Γ Δ σ}{γ γ' : Sub Γ Δ} → γ ≡Sub γ' → 
+         Tm Γ (σ [ γ ]) → Tm Γ (σ [ γ' ]) -- map a.k.a. subst
 
-
-{-
-data _≡Con_ where
-  ε : ε ≡Con ε
-  _·_ : ∀{Γ Γ'}{A : Ty Γ}{A' : Ty Γ'}(p : Γ ≡Con Γ') → A ≡Ty A' < p > -> (Γ · A) ≡Con (Γ' · A')
-  refl : ∀{Γ} → Γ ≡Con Γ
-  trans : ∀{Γ Δ Θ} → Δ ≡Con Θ → Γ ≡Con Δ → Γ ≡Con Θ
--}
-{-
-xx : ∀{Γ A A' } → A ≡Ty A' → (Γ · A) ≡Con (Γ · A')
-
-data _≡Ty_ where
-  U : ∀{Γ} → U {Γ} ≡Ty U
-  El : ∀{Γ u u'} → u ≡Tm u' → El {Γ} u ≡Ty El u'
-  Π : ∀{Γ}{A A' : Ty Γ}{B B'}(p : A ≡Ty A') → B ≡Ty (B' < xx p >) → Π A B ≡Ty Π A' B'
-  _[_] : ∀{Γ Δ}{A A' : Ty Γ}{γ γ' : Tms Δ Γ} → A ≡Ty A' → γ ≡Tms γ' → A [ γ ] ≡Ty A' [ γ' ]
-  refl : ∀{Γ}{A : Ty Γ} → A ≡Ty A
-  sym : ∀{Γ}{A B : Ty Γ} → A ≡Ty B → B ≡Ty A
-  trans : ∀{Γ}{A B C : Ty Γ} → B ≡Ty C → A ≡Ty B → A ≡Ty C
-  <refl> : ∀{Γ}{A : Ty Γ} → A ≡Ty (A < refl >)
-  <trans> : ∀{Γ Δ Θ}{A : Ty Θ}(p : Δ ≡Con Θ)(q  : Γ  ≡Con Δ) → A < trans p q > ≡Ty A < p > < q >
--}
 data _≡Tm_ where
+   β : ∀{Γ σ τ}{t : Tm (Γ · σ) τ} → app (lam t) ≡Tm t
+   η : ∀{Γ σ τ}{t : Tm Γ (Π σ τ)} → lam (app t) ≡Tm t
 
-data _≡Tms_ where
---  ↑ : ∀{Γ A A'} → A ≡Ty A' → ↑ A ≡Tms ↑ A'
 
+   refl  : ∀{Γ σ}{t : Tm Γ σ} → t ≡Tm t
+   sym   : ∀{Γ σ}{t t' : Tm Γ σ} → t ≡Tm t' → t' ≡Tm t
+   trans : ∀{Γ σ}{t t' t'' : Tm Γ σ} → t ≡Tm t' → t' ≡Tm t'' → t ≡Tm t''
 
---xx p = refl · trans <refl> p
+data _≡Sub_ where
 
 --
-weak : ∀{Γ A B} → Tm Γ B → Tm (Γ · A) (B [ ↑ A ])
+weak : ∀{Γ σ τ} → Tm Γ τ → Tm (Γ · σ) (τ [ ↑ σ ])
 weak t = t [ ↑ _ ]
 
-` : ∀{Γ A} → Tm Γ A → Tms Γ (Γ · A)
+` : ∀{Γ σ} → Tm Γ σ → Sub Γ (Γ · σ)
 ` t = id · t [ id ] 
 
-_$_ : ∀{Γ A B} → Tm Γ (Π A B) → (u : Tm Γ A) → Tm Γ (B [ ` u ])
+_$_ : ∀{Γ σ τ} → Tm Γ (Π σ τ) → (u : Tm Γ σ) → Tm Γ (τ [ ` u ])
 t $ u = app t [ ` u ]
 
