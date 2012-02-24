@@ -67,7 +67,7 @@ data _≡Tm_ where
    eta  : ∀{Γ σ τ}{t : Tm Γ (Π σ τ)} → lam (app t) ≡Tm t
    
    -- product laws
-   β₂ : ∀{Γ Δ σ} → (γ : Sub Γ Δ)(a : Tm Γ (σ [ γ ])) → vz [ γ · a ] ≡Tm a
+   --β₂ : ∀{Γ Δ σ} → (γ : Sub Γ Δ)(a : Tm Γ (σ [ γ ])) → vz [ γ · a ] ≡Tm a
 
    -- congruences
    _[_] : ∀{Γ Δ σ}{t t' : Tm Δ σ}{γ γ' : Sub Γ Δ} →
