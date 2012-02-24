@@ -71,7 +71,6 @@ data _≡Tm_ where
 --  γ · a : Sub Γ (Δ · σ)
 -- vz [ γ · a ] : σ [ ↑ ] [ γ · a ] 
 
-
    -- congruences
    _[_] : ∀{Γ Δ σ}{t t' : Tm Δ σ}{γ γ' : Sub Γ Δ} →
           t ≡Tm t' → (p : γ ≡Sub γ') → (t [ γ ]) < p > ≡Tm t' [ γ' ]
