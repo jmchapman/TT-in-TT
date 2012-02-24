@@ -22,10 +22,10 @@ data Ty where
   _[_] : ∀{Γ Δ} → Ty Δ → Sub Γ Δ → Ty Γ
 
 data Sub where
-  ↑ : ∀{Γ σ} → Sub (Γ · σ) Γ
   id : ∀{Γ} → Sub Γ Γ
   _•_ : ∀{B Γ Δ} → Sub Γ Δ → Sub B Γ → Sub B Δ
   ε : ∀{Γ} → Sub Γ ε
+  ↑ : ∀{Γ σ} → Sub (Γ · σ) Γ
   _·_ : ∀{Γ Δ σ} → (γ : Sub Γ Δ) → Tm Γ (σ [ γ ]) → Sub Γ (Δ · σ)
 
 data Tm where
@@ -35,6 +35,7 @@ data Tm where
   app  : ∀{Γ σ τ} → Tm Γ (Π σ τ) → Tm (Γ · σ) τ
   _<_> : ∀{Γ Δ σ}{γ γ' : Sub Γ Δ} → 
          Tm Γ (σ [ γ ]) → γ ≡Sub γ' →  Tm Γ (σ [ γ' ]) -- map a.k.a. subst
+  -- resp
 
 data _≡Sub_ where
    -- computation rules
@@ -44,6 +45,9 @@ data _≡Sub_ where
    rid : ∀{Γ Δ}{γ : Sub Γ Δ} → id • γ ≡Sub γ
    ass : ∀{A B Γ Δ}{α  : Sub Γ Δ}{β : Sub B Γ}{γ : Sub A B} →
          α • (β • γ) ≡Sub (α • β) • γ
+
+   -- product laws
+   ·β₁ :  ∀{Γ Δ σ}{γ : Sub Γ Δ}{a : Tm Γ (σ [ γ ])} → ↑ • (γ · a) ≡Sub γ 
 
    -- congruences
    _•_ : ∀{Θ Γ Δ}{γ γ' : Sub Γ Δ}{δ δ' : Sub Θ Γ} → γ ≡Sub γ' → δ ≡Sub δ'  → 
@@ -62,6 +66,9 @@ data _≡Tm_ where
    beta : ∀{Γ σ τ}{t : Tm (Γ · σ) τ} → app (lam t) ≡Tm t
    eta  : ∀{Γ σ τ}{t : Tm Γ (Π σ τ)} → lam (app t) ≡Tm t
    
+   -- product laws
+   β₂ : ∀{Γ Δ σ} → (γ : Sub Γ Δ)(a : Tm Γ (σ [ γ ])) → vz [ γ · a ] ≡Tm a
+
    -- congruences
    _[_] : ∀{Γ Δ σ}{t t' : Tm Δ σ}{γ γ' : Sub Γ Δ} →
           t ≡Tm t' → (p : γ ≡Sub γ') → (t [ γ ]) < p > ≡Tm t' [ γ' ]
