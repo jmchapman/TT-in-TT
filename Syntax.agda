@@ -68,6 +68,9 @@ data _≡Tm_ where
    
    -- product laws
    β₂ : ∀{Γ Δ σ} → (γ : Sub Γ Δ)(a : Tm Γ (σ [ γ ])) → vz [ γ · a ] ≡Tm a
+--  γ · a : Sub Γ (Δ · σ)
+-- vz [ γ · a ] : σ [ ↑ ] [ γ · a ] 
+
 
    -- congruences
    _[_] : ∀{Γ Δ σ}{t t' : Tm Δ σ}{γ γ' : Sub Γ Δ} →
