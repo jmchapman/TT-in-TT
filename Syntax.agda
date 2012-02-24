@@ -2,10 +2,10 @@ module Syntax where
 
 data Con : Set
 data Ty : Con → Set
-data Tm : (Γ : Con) → Ty Γ → Set
+data Tm : ∀ Γ → Ty Γ → Set
 data Sub : Con → Con → Set
 
-data _≡Tm_ : ∀{Γ A} → Tm Γ A → Tm Γ A → Set
+data _≡Tm_ : ∀{Γ σ} → Tm Γ σ → Tm Γ σ → Set
 data _≡Sub_ : ∀{Γ Δ} → Sub Γ Δ → Sub Γ Δ → Set
 
 infix 1 _≡Tm_
@@ -18,13 +18,13 @@ data Con where
 data Ty where
   U    : ∀{Γ} → Ty Γ
   El   : ∀{Γ} → Tm Γ U → Ty Γ
-  Π    : ∀{Γ}(σ : Ty Γ) → Ty (Γ · σ) → Ty Γ
+  Π    : ∀{Γ} σ → Ty (Γ · σ) → Ty Γ
   _[_] : ∀{Γ Δ} → Ty Δ → Sub Γ Δ → Ty Γ
 
 data Sub where
   ↑ : ∀{Γ σ} → Sub (Γ · σ) Γ
   id : ∀{Γ} → Sub Γ Γ
-  _•_ : ∀{Θ Γ Δ} → Sub Γ Δ → Sub Θ Γ → Sub Θ Δ
+  _•_ : ∀{B Γ Δ} → Sub Γ Δ → Sub B Γ → Sub B Δ
   ε : ∀{Γ} → Sub Γ ε
   _·_ : ∀{Γ Δ σ} → (γ : Sub Γ Δ) → Tm Γ (σ [ γ ]) → Sub Γ (Δ · σ)
 
@@ -38,10 +38,16 @@ data Tm where
 
 data _≡Sub_ where
    -- computation rules
+   
+   -- categorical laws
+   lid : ∀{Γ Δ}{γ : Sub Γ Δ} → γ • id ≡Sub γ
+   rid : ∀{Γ Δ}{γ : Sub Γ Δ} → id • γ ≡Sub γ
+   ass : ∀{A B Γ Δ}{α  : Sub Γ Δ}{β : Sub B Γ}{γ : Sub A B} →
+         α • (β • γ) ≡Sub (α • β) • γ
 
    -- congruences
    _•_ : ∀{Θ Γ Δ}{γ γ' : Sub Γ Δ}{δ δ' : Sub Θ Γ} → γ ≡Sub γ' → δ ≡Sub δ'  → 
-         γ • δ ≡Sub γ' • δ'
+         γ • δ ≡Sub γ' • δ' -- H & L have δ = δ'
    _·_ : ∀{Γ Δ σ}{γ γ' : Sub Γ Δ}{t : Tm Γ (σ [ γ ])}{t' : Tm Γ (σ [ γ' ])} →
          (p : γ ≡Sub γ') → t < p > ≡Tm t' → γ · t ≡Sub γ' · t'
 
@@ -53,8 +59,8 @@ data _≡Sub_ where
 
 data _≡Tm_ where
    -- computation rules
-   β : ∀{Γ σ τ}{t : Tm (Γ · σ) τ} → app (lam t) ≡Tm t
-   η : ∀{Γ σ τ}{t : Tm Γ (Π σ τ)} → lam (app t) ≡Tm t
+   beta : ∀{Γ σ τ}{t : Tm (Γ · σ) τ} → app (lam t) ≡Tm t
+   eta  : ∀{Γ σ τ}{t : Tm Γ (Π σ τ)} → lam (app t) ≡Tm t
    
    -- congruences
    _[_] : ∀{Γ Δ σ}{t t' : Tm Δ σ}{γ γ' : Sub Γ Δ} →
