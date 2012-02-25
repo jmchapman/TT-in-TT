@@ -7,5 +7,5 @@ open import Syntax2
 
 
 ⟦ Γ ⟧Con = {!!}
-⟦ σ ⟧Ty γ = ? 
+⟦ σ ⟧Ty γ = {!!} 
 
