@@ -38,8 +38,8 @@ data Ty where
 Uaux : ∀ {Γ Γ'}{γ : Γ ≡Con Γ'} → [ γ ] U ≡Ty U
 
 data [_]_≡Ty_ where
-  U : ∀ {Γ Γ'}{γ : Γ ≡Con Γ'} → [ γ ] U ≡Ty U
-  El : ∀ {Γ Γ'}{t : Tm Γ U}{t' : Tm Γ' U}{γ : Γ ≡Con Γ'} 
+  U : ∀ {Γ Γ'}.{γ : Γ ≡Con Γ'} → [ γ ] U ≡Ty U
+  El : ∀ {Γ Γ'}{t : Tm Γ U}{t' : Tm Γ' U}.{γ : Γ ≡Con Γ'} 
        → [ γ ⊢ Uaux {γ = γ}  ] t ≡Tm t' 
        → [ γ ] (El t) ≡Ty (El t')
   Π : ∀ {Γ Γ' σ σ' τ τ'}{γ : Γ ≡Con Γ'}(s : [ γ ] σ ≡Ty σ')
@@ -75,7 +75,7 @@ data Tm where
   _[_] : ∀{Γ Δ σ} → Tm Δ σ → (γ : Sub Γ Δ) → Tm Γ (σ [ γ ]Ty)
   lam  : ∀{Γ σ τ} → Tm (Γ · σ) τ → Tm Γ (Π σ τ)
   app  : ∀{Γ σ τ} → Tm Γ (Π σ τ) → Tm (Γ · σ) τ
-  _<_> : ∀{Γ Γ' σ σ'} → Tm Γ σ → {γ : Γ ≡Con Γ'} → [ γ ] σ ≡Ty σ' → Tm Γ' σ' 
+  _<_,_> : ∀{Γ Γ' σ σ'} → Tm Γ σ → .(γ : Γ' ≡Con Γ) → .([ γ ] σ' ≡Ty σ) → Tm Γ' σ' 
 
 _+_ : ∀ {Γ Δ}(ts : Sub Γ Δ)(σ : Ty Δ) → Sub (Γ · σ [ ts ]Ty) (Δ · σ)
 ts + σ = {!!}
@@ -89,14 +89,12 @@ El t [ ts ]Ty = El (U[]  (t [ ts ]))
 U[] t = t
 
 _<_>Ty : ∀{Γ Δ} → Ty Δ → .(Γ ≡Con Δ) → Ty Γ
-
-U<> : ∀ {Γ Δ}.{δ : Γ ≡Con Δ} → Tm Γ (U < δ >Ty) → Tm Γ U
+_<<_>>Ty : ∀{Γ Δ} → (σ : Ty Δ) → .(γ : Γ ≡Con Δ) → [ γ ] σ < γ >Ty ≡Ty σ
 
 U < γ >Ty = U
-El t < γ >Ty = {!!}
-Π σ τ < γ >Ty = {!!}
+El t < γ >Ty = El (t < γ , U {γ = γ} >)
+Π σ τ < γ >Ty = Π (σ < γ >Ty) (τ < γ · σ << γ >>Ty >Ty)
 
-U<> t = t
 
 {-
   _<_> : ∀{Γ Δ σ}{γ γ' : Sub Γ Δ} → 
@@ -133,6 +131,8 @@ data [_⊢_]_≡Tm_ where
   reflTm : ∀ {Γ}{σ}{t : Tm Γ σ} → [ reflCon ⊢ reflTy ] t ≡Tm t
   symTm : ∀{Γ Γ' σ σ' t t'}{γ : Γ ≡Con Γ'}{s : [ γ ] σ ≡Ty σ'} 
               → [ γ ⊢ s ] t ≡Tm t' → [ symCon γ ⊢ symTy γ s ] t' ≡Tm t
+  _<<_>> : ∀{Γ Δ}{σ : Ty Δ}(t : Tm Δ σ) → .(γ : Γ ≡Con Δ) 
+           → [ γ ⊢ σ << γ >>Ty ] (t < γ , σ << γ >>Ty >) ≡Tm t
 
 reflTy {Γ} {U} = U {γ = reflCon {Γ}}
 reflTy {Γ} {El t} = El {γ = reflCon} reflTm
@@ -143,6 +143,10 @@ symTy γ (El t) = El {γ = symCon γ} (symTm {γ = γ} {s = U {γ = γ}} t)
 symTy γ (Π s t) = Π {γ = symCon γ} (symTy γ s) (symTy (γ · s) t)
 
 transTy s t = {!!}
+
+U << γ >>Ty = U {γ = γ}
+El t << γ >>Ty = El {γ = γ} (t << γ >>)
+Π σ τ << γ >>Ty = Π {γ = γ} (σ << γ >>Ty) {!!}
 
 
 {-
