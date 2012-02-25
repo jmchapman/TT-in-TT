@@ -1,5 +1,5 @@
 module SyntacticLemmas where
-open import Syntax2
+open import Syntax
 
 mutual
   fog⁺ : forall {Γ Γ'}{σ : Ty Γ}{σ' : Ty Γ'} -> σ ≡⁺ σ' -> Γ ≡Con Γ'
