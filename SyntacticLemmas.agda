@@ -2,7 +2,7 @@ module SyntacticLemmas where
 open import Syntax
 
 mutual
-  fog⁺ : forall {Γ Γ'}{σ : Ty Γ}{σ' : Ty Γ'} -> σ ≡⁺ σ' -> Γ ≡Con Γ'
+  fog⁺ : forall {Γ Γ'}{σ : Ty Γ}{σ' : Ty Γ'} -> σ ≡Ty σ' -> Γ ≡Con Γ'
   fog⁺ (coh⁺ σ p) = symˠ p 
   fog⁺ refl⁺ = reflˠ 
   fog⁺ (trans⁺ p q) = transˠ (fog⁺ p) (fog⁺ q) 
@@ -16,11 +16,11 @@ mutual
   fog⁺ U[] = reflˠ
   fog⁺ El[] = reflˠ 
   fog⁺ Π[] = reflˠ
-  fog⁺ (dom p) = fog⁺ p 
-  fog⁺ (cod p) = cong, (fog⁺ p) (dom p)
+--  fog⁺ (dom p) = fog⁺ p 
+--  fog⁺ (cod p) = cong, (fog⁺ p) (dom p)
 
-  fog : forall {Γ Γ' σ σ'}{t : Tm Γ σ}{t' : Tm Γ' σ'} -> t ≡ t' ->
-                σ ≡⁺ σ'
+  fog : forall {Γ Γ' σ σ'}{t : Tm Γ σ}{t' : Tm Γ' σ'} -> t ≡Tm t' ->
+                σ ≡Ty σ'
   fog (coh t p) = sym⁺ p
   fog refl = refl⁺
   fog (trans p q) = trans⁺ (fog p) (fog q)
@@ -30,7 +30,7 @@ mutual
   fog (congtop p) = cong⁺ p (congpop p) 
   fog (cong p q) = cong⁺ (fog p) q
   fog (congλ p q) = congΠ p (fog q) 
-  fog (congapp p) = cod (fog p) 
+  fog (congapp p _) = p
   fog β = refl⁺
   fog η = refl⁺
   fog top< = trans⁺ assoc⁺ (cong⁺ refl⁺ pop<)
@@ -55,17 +55,17 @@ mutual
   fogˢ poptop = reflˠ
 
 εˢ : forall {Γ} -> Sub Γ ε
-εˢ {ε}     = id
+εˢ {ε}     = iden
 εˢ {Γ , σ} = εˢ • pop σ
 
 ir : forall {Γ Γ' Γ'' Γ'''}{σ : Ty Γ}{σ' σ''}{σ''' : Ty Γ'''}
      {t : Tm Γ' σ'}{t' : Tm Γ'' σ''} -> 
-     t ≡ t' -> {p : σ' ≡⁺ σ}{q : σ'' ≡⁺ σ'''} -> coe t p ≡ coe t' q
+     t ≡Tm t' -> {p : σ' ≡Ty σ}{q : σ'' ≡Ty σ'''} -> coe t p ≡Tm coe t' q
 ir p =  trans (coh _ _) (trans p (sym (coh _ _)))
 
 
 popid : forall {Γ Δ σ}{ts : Sub Γ Δ}{t : Tm Γ (σ [ ts ]⁺)} ->
-        (ts • pop (σ [ ts ]⁺) < coe top assoc⁺) • (id < t [ id ]) ≡ˢ ts < t
+        (ts • pop (σ [ ts ]⁺) < coe top assoc⁺) • (iden < t [ iden ]) ≡ˢ ts < t
 popid = 
   transˢ •< (cong< (transˢ assocˢ (transˢ (cong• reflˢ pop<) rightidˢ))
                    (trans (coh _ _) (trans (trans (cong (coh _ _) reflˢ) top<) 
@@ -73,8 +73,8 @@ popid =
 
 inst : forall {Γ Γ' Δ Δ' σ σ' τ τ'}{ts : Sub Γ Δ}{ts' : Sub Γ' Δ'}
       {t : Tm Γ (σ [ ts ]⁺)}{t' : Tm Γ' (σ' [ ts' ]⁺)} ->
-      τ [ ts ↗ σ ]⁺ ≡⁺ τ' [ ts' ↗ σ' ]⁺ ->
-      t ≡ t' -> τ [ ts < t ]⁺ ≡⁺ τ' [ ts' < t' ]⁺
+      τ [ ts ↗ σ ]⁺ ≡Ty τ' [ ts' ↗ σ' ]⁺ ->
+      t ≡Tm t' -> τ [ ts < t ]⁺ ≡Ty τ' [ ts' < t' ]⁺
 inst p q = 
   trans⁺ (cong⁺ refl⁺ (symˢ popid))
          (trans⁺ (trans⁺ (sym⁺ assoc⁺) 
