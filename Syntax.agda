@@ -5,6 +5,8 @@ data Ty : Con → Set
 data Tm : ∀ Γ → Ty Γ → Set
 data Sub : Con → Con → Set
 
+data ≡Con : Con → Con → Set where
+
 data _≡Tm_ : ∀{Γ σ} → Tm Γ σ → Tm Γ σ → Set
 data _≡Sub_ : ∀{Γ Δ} → Sub Γ Δ → Sub Γ Δ → Set
 
@@ -67,7 +69,7 @@ data _≡Tm_ where
    eta  : ∀{Γ σ τ}{t : Tm Γ (Π σ τ)} → lam (app t) ≡Tm t
    
    -- product laws
-   β₂ : ∀{Γ Δ σ} → (γ : Sub Γ Δ)(a : Tm Γ (σ [ γ ])) → vz [ γ · a ] ≡Tm a
+--   β₂ : ∀{Γ Δ σ} → (γ : Sub Γ Δ)(a : Tm Γ (σ [ γ ])) → vz [ γ · a ] ≡Tm a
 --  γ · a : Sub Γ (Δ · σ)
 -- vz [ γ · a ] : σ [ ↑ ] [ γ · a ] 
 
