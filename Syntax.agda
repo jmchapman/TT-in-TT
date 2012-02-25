@@ -34,7 +34,7 @@ data Tm where
   lam  : ∀{Γ σ τ} → Tm (Γ · σ) τ → Tm Γ (Π σ τ)
   app  : ∀{Γ σ τ} → Tm Γ (Π σ τ) → Tm (Γ · σ) τ
   _<_> : ∀{Γ Δ σ}{γ γ' : Sub Γ Δ} → 
-         Tm Γ (σ [ γ ]) → γ ≡Sub γ' →  Tm Γ (σ [ γ' ]) -- map a.k.a. subst
+         Tm Γ (σ [ γ ]) → .(γ ≡Sub γ') →  Tm Γ (σ [ γ' ]) -- map a.k.a. subst
   -- resp
 
 data _≡Sub_ where
