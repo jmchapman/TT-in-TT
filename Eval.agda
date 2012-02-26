@@ -77,12 +77,10 @@ eq-lem refl = refl
 ⟦ cong, p q ⟧Con≡ = cong₂ Σ ⟦ p ⟧Con≡  (ext ⟦ q ⟧Ty≡)
 
 ⟦ coh⁺ σ' p ⟧Ty≡ q = cong ⟦ σ' ⟧Ty (trans (subst-removable id (sym ⟦ p ⟧Con≡) _) q)
-⟦_⟧Ty≡ {σ = σ} refl⁺ p = cong ⟦ σ ⟧Ty p
-⟦_⟧Ty≡ {γ = γ} (trans⁺ p q) r = 
-   trans (⟦ p ⟧Ty≡ (sym (subst-removable id ⟦ fog⁺ p ⟧Con≡ γ))) 
-         (⟦ q ⟧Ty≡ (trans (subst-removable id ⟦ fog⁺ p ⟧Con≡ γ) r)) 
+⟦_⟧Ty≡ refl⁺ refl = refl
+⟦_⟧Ty≡ {γ = γ} (trans⁺ p q) r = {!⟦ !}
 ⟦ sym⁺ p     ⟧Ty≡ q = sym (⟦ p ⟧Ty≡ (sym q))
-⟦_⟧Ty≡  {σ' = σ'} rightid⁺ p = cong ⟦ σ' ⟧Ty p
+⟦_⟧Ty≡  {σ' = σ'} rightid⁺ p = {!!} -- cong ⟦ σ' ⟧Ty p
 ⟦ assoc⁺ {σ = σ}{ts = ts}{us = us} ⟧Ty≡  p = cong (λ γ → ⟦ σ ⟧Ty (⟦ ts ⟧Sub (⟦ us ⟧Sub γ))) p
 ⟦ cong⁺ p q  ⟧Ty≡ r = ⟦ p ⟧Ty≡  (⟦ q ⟧Sub≡ r) 
 ⟦ congU p    ⟧Ty≡ q = refl
@@ -91,12 +89,7 @@ eq-lem refl = refl
 ⟦ U[]        ⟧Ty≡ p = refl
 ⟦ El[] {t = t}{ts = ts} ⟧Ty≡  refl = {!!} 
   -- cong (λ γ → B (⟦ t ⟧U (⟦ ts ⟧Sub γ))) (sym (subst-removable id (sym ⟦ reflˠ ⟧Con≡) _))
-⟦_⟧Ty≡ {γ = γ}{γ' = γ'}(Π[] {σ = σ}{τ = τ}{ts = ts}) p = cong₂ (λ (X : Set) (Y : X → Set) → (x : X) → Y x) 
-                                             (cong (λ γ → ⟦ σ ⟧Ty (⟦ ts ⟧Sub γ)) p )
-                                             (ext (λ {x}{x'} x0 → cong₂ (λ x y → ⟦ τ ⟧Ty (x , y))
-                                                                        (cong ⟦ ts ⟧Sub p) 
-                                                                        {!!}))
-
+⟦_⟧Ty≡ {γ = γ}{γ' = γ'}(Π[] {σ = σ}{τ = τ}{ts = ts}) p = {!!}
 
 ⟦_⟧Sub≡_  = {!!}
 
